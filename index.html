@@ -1,605 +1,127 @@
 <!DOCTYPE html>
-<html lang="fr" class="dark">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EDOPro Lua Script Generator & Studio</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            ygo: {
-              bg: '#0f172a',
-              card: '#1e293b',
-              border: '#334155',
-              accent: '#8b5cf6',
-              accentHover: '#7c3aed',
-              gold: '#f59e0b',
-              goldHover: '#d97706',
-              spell: '#059669',
-              trap: '#be185d',
-              monster: '#d97706',
-              codeBg: '#090d16'
-            }
-          }
-        }
-      }
-    }
-  </script>
+  <title>EDOPro Script Studio</title>
+  
+  <!-- FontAwesome pour la bibliothèque d'icônes -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #0f172a; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #475569; }
-    
-    .lua-keyword { color: #f43f5e; font-weight: bold; }
-    .lua-function { color: #38bdf8; }
-    .lua-string { color: #4ade80; }
-    .lua-number { color: #fbbf24; }
-    .lua-comment { color: #64748b; font-style: italic; }
-    .lua-constant { color: #c084fc; font-weight: bold; }
-  </style>
+  
+  <!-- Feuille de style principale -->
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-ygo-bg text-slate-200 font-sans min-h-screen flex flex-col antialiased">
+<body>
 
-  <!-- Header -->
-  <header class="border-b border-ygo-border bg-slate-900/80 backdrop-blur sticky top-0 z-50 px-6 py-3 flex items-center justify-between">
-    <div class="flex items-center space-x-3">
-      <div class="bg-gradient-to-tr from-purple-600 to-amber-500 p-2 rounded-lg text-white font-bold text-xl shadow-lg">
-        <i class="fa-solid me-1 fa-scroll"></i>
-      </div>
-      <div>
-        <h1 class="text-lg font-bold tracking-wide text-white flex items-center gap-2">
-          EDOPro Script Studio
-        </h1>
-        <p class="text-xs text-slate-400">Générateur de scripts LUA pour EDOPro / Project Ignis</p>
-      </div>
+  <!-- Barre supérieure de navigation -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <i class="fa-solid fa-scroll"></i>
+      <span>EDOPro Script Studio</span>
     </div>
-    <div class="flex items-center space-x-3">
-      <button onclick="switchTab('generator')" id="btn-tab-generator" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 text-white transition">
-        <i class="fa-solid fa-wand-magic-sparkles me-1.5"></i>Générateur
+    
+    <nav class="topbar-tabs">
+      <button type="button" class="active" data-tab="generator" onclick="switchTab('generator')">
+        <i class="fa-solid fa-code"></i> Générateur
       </button>
-      <button onclick="switchTab('reference')" id="btn-tab-reference" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
-        <i class="fa-solid fa-book me-1.5"></i>API & Structure Guide
+      <button type="button" data-tab="reference" onclick="switchTab('reference')">
+        <i class="fa-solid fa-book-open"></i> Guide / Référence
       </button>
-      <button onclick="exportLuaFile()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-sm">
-        <i class="fa-solid fa-download me-1.5"></i>Télécharger .lua
+    </nav>
+
+    <div class="topbar-actions">
+      <button type="button" id="btn-copy" onclick="copyCode()" class="btn btn-secondary">
+        <i class="fa-solid fa-copy"></i> <span id="copy-label">Copier</span>
+      </button>
+      <button type="button" id="btn-export" onclick="exportLuaFile()" class="btn btn-primary">
+        <i class="fa-solid fa-download"></i> Télécharger .lua
       </button>
     </div>
   </header>
 
-  <!-- Main Body -->
-  <main class="flex-1 p-4 lg:p-6 max-w-[1920px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+  <!-- VUE 1 : Générateur de Script -->
+  <main id="view-generator" class="workspace">
+    <!-- Barre latérale : Identité & Liste des effets -->
+    <aside id="explorer" class="explorer-container"></aside>
 
-    <!-- GENERATOR VIEW -->
-    <div id="view-generator" class="col-span-12 grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
-      
-      <!-- Left Panel: Controls & Options (7 Cols) -->
-      <div class="lg:col-span-7 flex flex-col space-y-5 overflow-y-auto max-h-[calc(100vh-120px)] pr-1">
-        
-        <!-- CARD METADATA SECTION -->
-        <div class="bg-ygo-card border border-ygo-border rounded-xl p-4 shadow-sm">
-          <div class="flex items-center justify-between border-b border-ygo-border pb-3 mb-4">
-            <h2 class="text-sm font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
-              <i class="fa-solid fa-address-card"></i> 1. Identité de la Carte
-            </h2>
-            <span class="text-xs text-slate-400">Information BDD / SQLite (`.cdb`)</span>
-          </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-            <div>
-              <label class="block font-medium text-slate-300 mb-1">Passcode / Card ID *</label>
-              <input type="number" id="card-id" value="" placeholder="ex: 10000001" oninput="updateScript()" class="w-full bg-slate-900 border border-ygo-border rounded px-3 py-2 text-amber-300 font-mono font-bold focus:outline-none focus:border-purple-500">
-              <span class="text-[10px] text-slate-500 mt-1 block">Fichier: c<span id="filename-preview">...</span>.lua</span>
-            </div>
-            
-            <div>
-              <label class="block font-medium text-slate-300 mb-1">Nom de la Carte</label>
-              <input type="text" id="card-name" value="" placeholder="ex: Nom de la carte" oninput="updateScript()" class="w-full bg-slate-900 border border-ygo-border rounded px-3 py-2 text-white focus:outline-none focus:border-purple-500">
-            </div>
+    <!-- Zone centrale : Formulaire de paramétrage de l'effet actif -->
+    <section id="editor" class="editor-container"></section>
 
-            <div>
-              <label class="block font-medium text-slate-300 mb-1">Type Général</label>
-              <select id="card-type-category" onchange="updateScript()" class="w-full bg-slate-900 border border-ygo-border rounded px-3 py-2 text-slate-200 focus:outline-none focus:border-purple-500">
-                <option value="MONSTER">Monstre (Effet / Normal / Extra)</option>
-                <option value="SPELL">Magie (Normal, Continu, Jeu Rapide...)</option>
-                <option value="TRAP">Piège (Normal, Continu, Contre...)</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block font-medium text-slate-300 mb-1">Code Archétype (Setcode Hex)</label>
-              <input type="text" id="card-setcode" value="" placeholder="ex: 0x7b" oninput="updateScript()" class="w-full bg-slate-900 border border-ygo-border rounded px-3 py-2 text-purple-400 font-mono focus:outline-none focus:border-purple-500">
-              <span class="text-[10px] text-slate-500 mt-1 block">`s.listed_series={0x...}`</span>
-            </div>
-
-            <div>
-              <label class="block font-medium text-slate-300 mb-1">ID Carte Listée Spécifiquement</label>
-              <input type="number" id="card-listed-id" value="" placeholder="ex: 46986414" oninput="updateScript()" class="w-full bg-slate-900 border border-ygo-border rounded px-3 py-2 text-amber-300 font-mono focus:outline-none focus:border-purple-500">
-              <span class="text-[10px] text-slate-500 mt-1 block">`s.listed_names={...}`</span>
-            </div>
-
-            <div class="flex items-center pt-5">
-              <label class="inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="card-has-grave-eff" onchange="updateScript()" class="sr-only peer">
-                <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
-                <span class="ml-2 text-xs font-medium text-slate-300">A un effet au Cimetière</span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- CARD EFFECTS BUILDER SECTION -->
-        <div class="bg-ygo-card border border-ygo-border rounded-xl p-4 shadow-sm flex-1">
-          <div class="flex items-center justify-between border-b border-ygo-border pb-3 mb-4">
-            <h2 class="text-sm font-bold uppercase tracking-wider text-purple-400 flex items-center gap-2">
-              <i class="fa-solid fa-gears"></i> 2. Configuration des Effets (`initial_effect`)
-            </h2>
-            <button onclick="addEffectBlock()" class="px-2.5 py-1 text-xs bg-purple-600 hover:bg-purple-500 text-white rounded font-semibold transition flex items-center gap-1">
-              <i class="fa-solid fa-plus"></i> Ajouter un effet
-            </button>
-          </div>
-
-          <!-- Dynamic Container for Effects -->
-          <div id="effects-container" class="space-y-4">
-            <!-- Effect items generated by JS -->
-          </div>
-        </div>
-
+    <!-- Zone droite : Prévisualisation temps réel du code Lua -->
+    <section class="code-preview-container">
+      <div class="code-header">
+        <span class="code-title">
+          <i class="fa-regular fa-file-code"></i> <span id="code-filename">c.lua</span>
+        </span>
       </div>
-
-      <!-- Right Panel: Code Preview & Interactive Terminal (5 Cols) -->
-      <div class="lg:col-span-5 flex flex-col space-y-4">
-        
-        <!-- Script Output Box -->
-        <div class="bg-ygo-card border border-ygo-border rounded-xl flex flex-col h-full shadow-lg overflow-hidden">
-          <div class="bg-slate-900 px-4 py-3 border-b border-ygo-border flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-              <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
-              <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
-              <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
-              <span class="text-xs font-mono text-slate-400 ms-2" id="code-file-label">c.lua</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <button onclick="copyCode()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded border border-slate-700 transition flex items-center gap-1">
-                <i class="fa-regular fa-copy" id="copy-icon"></i> <span id="copy-text">Copier</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="p-4 bg-ygo-codeBg flex-1 overflow-auto font-mono text-xs leading-relaxed">
-            <pre id="lua-output" class="text-slate-300"><code>-- Loading script...</code></pre>
-          </div>
-
-          <div class="bg-slate-900 border-t border-ygo-border p-3 text-[11px] text-slate-400 flex items-center justify-between">
-            <span><i class="fa-solid fa-check-circle text-emerald-400 me-1"></i> Syntaxe EDOPro Core Valide</span>
-            <span>UTF-8 Without BOM</span>
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- REFERENCE / GUIDE VIEW (Hidden by default) -->
-    <div id="view-reference" class="col-span-12 hidden space-y-6">
-      
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        <div class="bg-ygo-card border border-ygo-border p-5 rounded-xl">
-          <h3 class="text-sm font-bold text-amber-400 mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-folder-tree"></i> Structure des Dossiers EDOPro
-          </h3>
-          <p class="text-xs text-slate-300 leading-relaxed mb-3">
-            Pour qu'EDOPro reconnaisse votre carte personnalisée, respectez strictement l'arborescence :
-          </p>
-          <ul class="text-xs space-y-2 font-mono text-purple-300 bg-slate-900 p-3 rounded border border-slate-800">
-            <li>expansions/</li>
-            <li>├── custom.cdb <span class="text-slate-500">(Database SQL)</span></li>
-            <li>├── script/</li>
-            <li>│   └── c10000001.lua <span class="text-slate-500">(Script LUA)</span></li>
-            <li>└── pics/</li>
-            <li>    └── 10000001.jpg <span class="text-slate-500">(Image)</span></li>
-          </ul>
-        </div>
-
-        <div class="bg-ygo-card border border-ygo-border p-5 rounded-xl">
-          <h3 class="text-sm font-bold text-sky-400 mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-code"></i> Paramètres des Fonctions (`e,tp,eg...`)
-          </h3>
-          <div class="text-xs space-y-1.5 text-slate-300">
-            <p><code class="text-amber-400 font-bold">e</code> : L'effet courant (`Effect` object)</p>
-            <p><code class="text-amber-400 font-bold">tp</code> : Triggering Player (0 ou 1)</p>
-            <p><code class="text-amber-400 font-bold">eg</code> : Event Group (Cartes liées au déclencheur)</p>
-            <p><code class="text-amber-400 font-bold">ep</code> : Event Player (Joueur ayant causé l'event)</p>
-            <p><code class="text-amber-400 font-bold">ev</code> : Event Value (ex: valeur de dégâts)</p>
-            <p><code class="text-amber-400 font-bold">re</code> : Reason Effect (Effet responsable)</p>
-            <p><code class="text-amber-400 font-bold">chk</code> : Check Pass (`0` = test légalité, `1` = exécution)</p>
-          </div>
-        </div>
-
-        <div class="bg-ygo-card border border-ygo-border p-5 rounded-xl">
-          <h3 class="text-sm font-bold text-emerald-400 mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-shield-halved"></i> Types de Limitations (HOPT)
-          </h3>
-          <div class="text-xs space-y-2 text-slate-300">
-            <div>
-              <span class="font-semibold text-purple-300">Soft OPT:</span> `e:SetCountLimit(1)`
-              <p class="text-[11px] text-slate-400">Une fois par tour par exemplaire sur le terrain.</p>
-            </div>
-            <div>
-              <span class="font-semibold text-purple-300">Hard OPT (Use):</span> `e:SetCountLimit(1, id)`
-              <p class="text-[11px] text-slate-400">Vous ne pouvez utiliser cet effet de [Nom] qu'une fois par tour.</p>
-            </div>
-            <div>
-              <span class="font-semibold text-purple-300">Hard OPT (Oath):</span> `e:SetCountLimit(1, id, EFFECT_COUNT_CODE_OATH)`
-              <p class="text-[11px] text-slate-400">Si l'activation est annulée, vous ne pouvez plus le réactiver.</p>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-
+      <pre class="code-body"><code id="lua-output">-- Le code Lua apparaîtra ici...</code></pre>
+    </section>
   </main>
 
-  <!-- Script Logic -->
-  <script>
-    let effectCount = 0;
-    let effectsData = [];
-
-    function createDefaultEffectObject(index) {
-      return {
-        id: index,
-        type: 'IGNITION',
-        code: 'EVENT_FREE_CHAIN',
-        optType: 'HARD_USE',
-        optCount: 1,
-        category: 'SPECIAL_SUMMON',
-        cost: 'LP',
-        costParam: 1000,
-        cond: 'NONE',
-        targetLoc: 'LOCATION_DECK',
-        targetCount: 1,
-        operation: 'SPECIAL_SUMMON'
-      };
-    }
-
-    window.onload = function() {
-      updateScript();
-    };
-
-    function switchTab(tab) {
-      document.getElementById('view-generator').classList.toggle('hidden', tab !== 'generator');
-      document.getElementById('view-reference').classList.toggle('hidden', tab !== 'reference');
+  <!-- VUE 2 : Documentation & Référence API -->
+  <main id="view-reference" class="workspace hidden">
+    <div class="reference-wrapper">
+      <h2><i class="fa-solid fa-book"></i> Aide & Aide-mémoire EDOPro Lua</h2>
+      <p>Voici les règles de base pour structurer vos scripts Yu-Gi-Oh! pour EDOPro :</p>
       
-      document.getElementById('btn-tab-generator').className = tab === 'generator' 
-        ? "px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 text-white transition"
-        : "px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
-        
-      document.getElementById('btn-tab-reference').className = tab === 'reference' 
-        ? "px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 text-white transition"
-        : "px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
-    }
+      <div class="ref-card">
+        <h3><i class="fa-solid fa-cube"></i> Structure de base (cID.lua)</h3>
+        <p>Chaque carte enregistre ses effets dans la fonction <code>s.initial_effect(c)</code>.</p>
+        <pre><code>local s, id = GetID()
 
-    function addEffectBlock() {
-      effectCount++;
-      const effId = effectCount;
-      const effObj = createDefaultEffectObject(effId);
-      effectsData.push(effObj);
+function s.initial_effect(c)
+  -- Exemple d'enregistrement d'un effet
+  local e1 = Effect.CreateEffect(c)
+  e1:SetType(EFFECT_TYPE_IGNITION)
+  e1:SetRange(LOCATION_MZONE)
+  e1:SetCountLimit(1, id) -- Hard OPT
+  e1:SetTarget(s.tg1)
+  e1:SetOperation(s.op1)
+  c:RegisterEffect(e1)
+end</code></pre>
+      </div>
 
-      const container = document.getElementById('effects-container');
-      const div = document.createElement('div');
-      div.id = `effect-card-${effId}`;
-      div.className = "bg-slate-900 border border-ygo-border rounded-lg p-3 relative text-xs space-y-3";
+      <div class="ref-card">
+        <h3><i class="fa-solid fa-layer-group"></i> Archétypes & Cartes liées</h3>
+        <p>Les propriétés de recherche ou de synergie se définissent via des listes d'IDs et de masques d'archétypes :</p>
+        <ul>
+          <li><code>s.listed_series = { 0x8, 0x3008 }</code> — Archétype(s) référencé(s) sur la carte.</li>
+          <li><code>s.listed_names = { 46986414 }</code> — IDs spécifiques de cartes citées texte pour texte.</li>
+        </ul>
+      </div>
+    </div>
+  </main>
 
-      div.innerHTML = `
-        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-          <span class="font-bold text-amber-400 flex items-center gap-1">
-            <i class="fa-solid fa-bolt"></i> Effet #${effId}
-          </span>
-          <button onclick="removeEffectBlock(${effId})" class="text-rose-400 hover:text-rose-300 text-xs px-2 py-0.5 rounded bg-rose-950/40 border border-rose-800/40">
-            <i class="fa-solid fa-trash me-1"></i>Supprimer
-          </button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <!-- Type d'effet -->
-          <div>
-            <label class="block text-slate-400 mb-1 font-medium">Type d'effet</label>
-            <select onchange="updateEffectData(${effId}, 'type', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-slate-200">
-              <option value="IGNITION">Ignition (Effet d'Action)</option>
-              <option value="QUICK_O">Quick Effect (Jeu Rapide - Optionnel)</option>
-              <option value="ACTIVATE">Activation (Carte Magie / Piège)</option>
-              <option value="TRIGGER_O">Déclencheur (Trigger - Optionnel)</option>
-              <option value="TRIGGER_F">Déclencheur (Trigger - Obligatoire)</option>
-            </select>
-          </div>
-
-          <!-- Restauration / OPT -->
-          <div>
-            <label class="block text-slate-400 mb-1 font-medium">Limite d'utilisation (OPT)</label>
-            <select onchange="updateEffectData(${effId}, 'optType', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-purple-300">
-              <option value="HARD_USE">Hard OPT (Utilisation - "You can use")</option>
-              <option value="HARD_OATH">Hard OPT (Serment/Oath - "You can activate")</option>
-              <option value="SOFT">Soft OPT (Par exemplaire)</option>
-              <option value="ONCE_DUEL">Une fois par Duel</option>
-              <option value="NONE">Aucune limite</option>
-            </select>
-          </div>
-
-          <!-- Catégorie Officielle -->
-          <div>
-            <label class="block text-slate-400 mb-1 font-medium">Catégorie (Ash / Chain Check)</label>
-            <select onchange="updateEffectData(${effId}, 'category', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-amber-300 font-mono">
-              <option value="SPECIAL_SUMMON">CATEGORY_SPECIAL_SUMMON</option>
-              <option value="TOHAND">CATEGORY_TOHAND (Tuteur/Search)</option>
-              <option value="DESTROY">CATEGORY_DESTROY</option>
-              <option value="DRAW">CATEGORY_DRAW</option>
-              <option value="ATKCHANGE">CATEGORY_ATKCHANGE</option>
-            </select>
-          </div>
-
-          <!-- Condition -->
-          <div>
-            <label class="block text-slate-400 mb-1 font-medium">Condition Préalable</label>
-            <select onchange="updateEffectData(${effId}, 'cond', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-slate-200">
-              <option value="NONE">Aucune Condition</option>
-              <option value="CONTROL_MONSTER">Contrôle au moins 1 monstre</option>
-              <option value="CONTROL_SERIES">Contrôle un monstre de l'archétype</option>
-            </select>
-          </div>
-
-          <!-- Coût -->
-          <div>
-            <label class="block text-slate-400 mb-1 font-medium">Coût d'activation</label>
-            <select onchange="updateEffectData(${effId}, 'cost', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-slate-200">
-              <option value="LP">Payer 1000 LP</option>
-              <option value="DISCARD">Défausser 1 carte</option>
-              <option value="BANISH_GRAVE">Bannir 1 carte du Cimetière</option>
-              <option value="NONE">Sans coût</option>
-            </select>
-          </div>
-
-          <!-- Action Principale -->
-          <div>
-            <label class="block text-slate-400 mb-1 font-medium">Action de Résolution</label>
-            <select onchange="updateEffectData(${effId}, 'operation', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-emerald-400 font-medium">
-              <option value="SPECIAL_SUMMON">Invoquer Spécialement depuis le Deck</option>
-              <option value="ADD_TO_HAND">Ajouter du Deck à la Main</option>
-              <option value="DESTROY">Détruire 1 carte sur le terrain</option>
-              <option value="DRAW">Piocher 2 cartes</option>
-            </select>
-          </div>
-        </div>
-      `;
-
-      container.appendChild(div);
-      updateScript();
-    }
-
-    function removeEffectBlock(id) {
-      effectsData = effectsData.filter(e => e.id !== id);
-      const el = document.getElementById(`effect-card-${id}`);
-      if (el) el.remove();
-      updateScript();
-    }
-
-    function updateEffectData(id, field, value) {
-      const eff = effectsData.find(e => e.id === id);
-      if (eff) {
-        eff[field] = value;
-        updateScript();
-      }
-    }
-
-    function updateScript() {
-      const cardId = document.getElementById('card-id').value;
-      const cardName = document.getElementById('card-name').value;
-      const setcode = document.getElementById('card-setcode').value;
-      const listedId = document.getElementById('card-listed-id').value;
-      const hasGraveEff = document.getElementById('card-has-grave-eff').checked;
-
-      document.getElementById('filename-preview').innerText = cardId || '...';
-      document.getElementById('code-file-label').innerText = cardId ? `c${cardId}.lua` : 'c.lua';
-
-      let code = cardName ? `-- ${cardName}\n` : `-- Script généré pour EDOPro\n`;
-      code += `local s,id=GetID()\n`;
-      code += `function s.initial_effect(c)\n`;
-
-      effectsData.forEach((eff, idx) => {
-        const eNum = idx + 1;
-        code += `\t-- Effet #${eNum}\n`;
-        code += `\tlocal e${eNum}=Effect.CreateEffect(c)\n`;
-        code += `\te${eNum}:SetCategory(CATEGORY_${eff.category})\n`;
-
-        if (eff.type === 'IGNITION') {
-          code += `\te${eNum}:SetType(EFFECT_TYPE_IGNITION)\n`;
-          code += `\te${eNum}:SetRange(LOCATION_MZONE)\n`;
-        } else if (eff.type === 'QUICK_O') {
-          code += `\te${eNum}:SetType(EFFECT_TYPE_QUICK_O)\n`;
-          code += `\te${eNum}:SetCode(EVENT_FREE_CHAIN)\n`;
-          code += `\te${eNum}:SetRange(LOCATION_MZONE)\n`;
-        } else if (eff.type === 'ACTIVATE') {
-          code += `\te${eNum}:SetType(EFFECT_TYPE_ACTIVATE)\n`;
-          code += `\te${eNum}:SetCode(EVENT_FREE_CHAIN)\n`;
-        } else if (eff.type === 'TRIGGER_O') {
-          code += `\te${eNum}:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)\n`;
-          code += `\te${eNum}:SetCode(EVENT_SUMMON_SUCCESS)\n`;
-          code += `\te${eNum}:SetProperty(EFFECT_FLAG_DELAY)\n`;
-        }
-
-        if (eff.optType === 'HARD_USE') {
-          code += `\te${eNum}:SetCountLimit(1,id)\n`;
-        } else if (eff.optType === 'HARD_OATH') {
-          code += `\te${eNum}:SetCountLimit(1,id,EFFECT_COUNT_CODE_OATH)\n`;
-        } else if (eff.optType === 'SOFT') {
-          code += `\te${eNum}:SetCountLimit(1)\n`;
-        } else if (eff.optType === 'ONCE_DUEL') {
-          code += `\te${eNum}:SetCountLimit(1,id,EFFECT_COUNT_CODE_DUEL)\n`;
-        }
-
-        if (eff.cond !== 'NONE') code += `\te${eNum}:SetCondition(s.con${eNum})\n`;
-        if (eff.cost !== 'NONE') code += `\te${eNum}:SetCost(s.cost${eNum})\n`;
-        code += `\te${eNum}:SetTarget(s.tg${eNum})\n`;
-        code += `\te${eNum}:SetOperation(s.op${eNum})\n`;
-        code += `\tc:RegisterEffect(e${eNum})\n\n`;
-      });
-
-      code += `end\n\n`;
-
-      if (setcode) {
-        code += `s.listed_series={${setcode}}\n`;
-      }
-      if (listedId) {
-        code += `s.listed_names={${listedId}}\n`;
+  <!-- Chargement des Scripts -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  
+  <script>
+    // Initialisation du script au chargement de la page
+    document.addEventListener("DOMContentLoaded", () => {
+      // Finalisation de la fonction d'export initialement entamée dans le fichier app.js
+      if (typeof exportLuaFile === "undefined" || !exportLuaFile.toString().includes("a.click")) {
+        window.exportLuaFile = function() {
+          const filename = state.card.id ? `c${state.card.id}.lua` : "script.lua";
+          const blob = new Blob([window.generatedRawLua || ""], { type: "text/plain;charset=utf-8" });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(a.href);
+        };
       }
 
-      code += `\n`;
+      // Rendu initial de l'application
+      window.renderAll = function() {
+        renderExplorer();
+        renderEditor();
+        renderCode();
+      };
 
-      effectsData.forEach((eff, idx) => {
-        const eNum = idx + 1;
-
-        if (eff.cond === 'CONTROL_MONSTER') {
-          code += `function s.con${eNum}(e,tp,eg,ep,ev,re,r,rp)\n`;
-          code += `\treturn Duel.IsExistingMatchingCard(nil,tp,LOCATION_MZONE,0,1,nil)\n`;
-          code += `end\n\n`;
-        } else if (eff.cond === 'CONTROL_SERIES') {
-          code += `function s.cfilter${eNum}(c)\n`;
-          code += `\treturn c:IsFaceup() and c:IsSetCard(${setcode || '0x0'})\n`;
-          code += `end\n`;
-          code += `function s.con${eNum}(e,tp,eg,ep,ev,re,r,rp)\n`;
-          code += `\treturn Duel.IsExistingMatchingCard(s.cfilter${eNum},tp,LOCATION_MZONE,0,1,nil)\n`;
-          code += `end\n\n`;
-        }
-
-        if (eff.cost === 'LP') {
-          code += `function s.cost${eNum}(e,tp,eg,ep,ev,re,r,rp,chk)\n`;
-          code += `\tif chk==0 then return Duel.CheckLPCost(tp,1000) end\n`;
-          code += `\tDuel.PayLPCost(tp,1000)\n`;
-          code += `end\n\n`;
-        } else if (eff.cost === 'DISCARD') {
-          code += `function s.cost${eNum}(e,tp,eg,ep,ev,re,r,rp,chk)\n`;
-          code += `\tif chk==0 then return Duel.IsExistingMatchingCard(Card.IsDiscardable,tp,LOCATION_HAND,0,1,e:GetHandler()) end\n`;
-          code += `\tDuel.DiscardHand(tp,Card.IsDiscardable,1,1,REASON_COST+REASON_DISCARD,e:GetHandler())\n`;
-          code += `end\n\n`;
-        } else if (eff.cost === 'BANISH_GRAVE') {
-          code += `function s.cost${eNum}(e,tp,eg,ep,ev,re,r,rp,chk)\n`;
-          code += `\tif chk==0 then return Duel.IsExistingMatchingCard(Card.IsAbleToRemoveAsCost,tp,LOCATION_GRAVE,0,1,nil) end\n`;
-          code += `\tDuel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)\n`;
-          code += `\tlocal g=Duel.SelectMatchingCard(tp,Card.IsAbleToRemoveAsCost,tp,LOCATION_GRAVE,0,1,1,nil)\n`;
-          code += `\tDuel.Remove(g,POS_FACEUP,REASON_COST)\n`;
-          code += `end\n\n`;
-        }
-
-        if (eff.operation === 'SPECIAL_SUMMON') {
-          code += `function s.spfilter${eNum}(c,e,tp)\n`;
-          code += `\treturn c:IsCanBeSpecialSummoned(e,0,tp,false,false)\n`;
-          code += `end\n`;
-          code += `function s.tg${eNum}(e,tp,eg,ep,ev,re,r,rp,chk)\n`;
-          code += `\tif chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0\n`;
-          code += `\t\tand Duel.IsExistingMatchingCard(s.spfilter${eNum},tp,LOCATION_DECK,0,1,nil,e,tp) end\n`;
-          code += `\tDuel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_DECK)\n`;
-          code += `end\n\n`;
-
-          code += `function s.op${eNum}(e,tp,eg,ep,ev,re,r,rp)\n`;
-          code += `\tif Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end\n`;
-          code += `\tDuel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)\n`;
-          code += `\tlocal g=Duel.SelectMatchingCard(tp,s.spfilter${eNum},tp,LOCATION_DECK,0,1,1,nil,e,tp)\n`;
-          code += `\tif #g>0 then\n`;
-          code += `\t\tDuel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)\n`;
-          code += `\tend\n`;
-          code += `end\n\n`;
-        } else if (eff.operation === 'ADD_TO_HAND') {
-          code += `function s.thfilter${eNum}(c)\n`;
-          code += `\treturn c:IsAbleToHand()\n`;
-          code += `end\n`;
-          code += `function s.tg${eNum}(e,tp,eg,ep,ev,re,r,rp,chk)\n`;
-          code += `\tif chk==0 then return Duel.IsExistingMatchingCard(s.thfilter${eNum},tp,LOCATION_DECK,0,1,nil) end\n`;
-          code += `\tDuel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)\n`;
-          code += `end\n\n`;
-
-          code += `function s.op${eNum}(e,tp,eg,ep,ev,re,r,rp)\n`;
-          code += `\tDuel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)\n`;
-          code += `\tlocal g=Duel.SelectMatchingCard(tp,s.thfilter${eNum},tp,LOCATION_DECK,0,1,1,nil)\n`;
-          code += `\tif #g>0 then\n`;
-          code += `\t\tDuel.SendtoHand(g,nil,REASON_EFFECT)\n`;
-          code += `\t\tDuel.ConfirmCards(1-tp,g)\n`;
-          code += `\tend\n`;
-          code += `end\n\n`;
-        } else if (eff.operation === 'DESTROY') {
-          code += `function s.tg${eNum}(e,tp,eg,ep,ev,re,r,rp,chk)\n`;
-          code += `\tif chk==0 then return Duel.IsExistingMatchingCard(Card.IsDestructible,tp,0,LOCATION_ONFIELD,1,nil) end\n`;
-          code += `\tlocal g=Duel.GetMatchingGroup(Card.IsDestructible,tp,0,LOCATION_ONFIELD,nil)\n`;
-          code += `\tDuel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,0,0)\n`;
-          code += `end\n\n`;
-
-          code += `function s.op${eNum}(e,tp,eg,ep,ev,re,r,rp)\n`;
-          code += `\tDuel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)\n`;
-          code += `\tlocal g=Duel.SelectMatchingCard(tp,Card.IsDestructible,tp,0,LOCATION_ONFIELD,1,1,nil)\n`;
-          code += `\tif #g>0 then\n`;
-          code += `\t\tDuel.Destroy(g,REASON_EFFECT)\n`;
-          code += `\tend\n`;
-          code += `end\n\n`;
-        } else if (eff.operation === 'DRAW') {
-          code += `function s.tg${eNum}(e,tp,eg,ep,ev,re,r,rp,chk)\n`;
-          code += `\tif chk==0 then return Duel.IsPlayerCanDraw(tp,2) end\n`;
-          code += `\tDuel.SetTargetPlayer(tp)\n`;
-          code += `\tDuel.SetTargetParam(2)\n`;
-          code += `\tDuel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,2)\n`;
-          code += `end\n\n`;
-
-          code += `function s.op${eNum}(e,tp,eg,ep,ev,re,r,rp)\n`;
-          code += `\tlocal p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)\n`;
-          code += `\tDuel.Draw(p,d,REASON_EFFECT)\n`;
-          code += `end\n\n`;
-        }
-      });
-
-      document.getElementById('lua-output').innerHTML = highlightLua(code);
-      window.generatedRawLua = code;
-    }
-
-    function highlightLua(code) {
-      return code
-        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-        .replace(/(--.*)/g, '<span class="lua-comment">$1</span>')
-        .replace(/\b(local|function|end|return|if|then|else|elseif)\b/g, '<span class="lua-keyword">$1</span>')
-        .replace(/\b(GetID|Effect|Duel|Card|CreateEffect|RegisterEffect|SetType|SetCategory|SetCode|SetProperty|SetCountLimit|SetCondition|SetCost|SetTarget|SetOperation|IsExistingMatchingCard|SelectMatchingCard|SpecialSummon|SendtoHand|Destroy|Draw|ConfirmCards)\b/g, '<span class="lua-function">$1</span>')
-        .replace(/\b(EFFECT_TYPE_\w+|EVENT_\w+|LOCATION_\w+|CATEGORY_\w+|REASON_\w+|POS_\w+|EFFECT_COUNT_CODE_\w+)\b/g, '<span class="lua-constant">$1</span>')
-        .replace(/\b(\d+|0x[0-9a-fA-F]+)\b/g, '<span class="lua-number">$1</span>');
-    }
-
-    function copyCode() {
-      if (!window.generatedRawLua) return;
-      navigator.clipboard.writeText(window.generatedRawLua).then(() => {
-        const copyText = document.getElementById('copy-text');
-        const copyIcon = document.getElementById('copy-icon');
-        copyText.innerText = "Copié !";
-        copyIcon.className = "fa-solid fa-check text-emerald-400";
-        setTimeout(() => {
-          copyText.innerText = "Copier";
-          copyIcon.className = "fa-regular fa-copy";
-        }, 2000);
-      });
-    }
-
-    function exportLuaFile() {
-      const cardId = document.getElementById('card-id').value;
-      const filename = cardId ? `c${cardId}.lua` : 'script.lua';
-      const blob = new Blob([window.generatedRawLua || ''], { type: 'text/plain;charset=utf-8' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(a.href);
-    }
+      // Premier rendu
+      renderAll();
+    });
   </script>
 </body>
 </html>
