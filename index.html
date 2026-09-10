@@ -13,64 +13,81 @@
 </head>
 <body>
 
-  <!-- Barre supérieure de navigation -->
-  <header class="topbar">
-    <div class="topbar-brand">
-      <i class="fa-solid fa-scroll"></i>
-      <span>EDOPro Script Studio</span>
-    </div>
-    
-    <nav class="topbar-tabs">
-      <button type="button" class="active" data-tab="generator" onclick="switchTab('generator')">
-        <i class="fa-solid fa-code"></i> Générateur
-      </button>
-      <button type="button" data-tab="reference" onclick="switchTab('reference')">
-        <i class="fa-solid fa-book-open"></i> Guide / Référence
-      </button>
-    </nav>
-
-    <div class="topbar-actions">
-      <button type="button" id="btn-copy" onclick="copyCode()" class="btn btn-secondary">
-        <i class="fa-solid fa-copy"></i> <span id="copy-label">Copier</span>
-      </button>
-      <button type="button" id="btn-export" onclick="exportLuaFile()" class="btn btn-primary">
-        <i class="fa-solid fa-download"></i> Télécharger .lua
-      </button>
-    </div>
-  </header>
-
-  <!-- VUE 1 : Générateur de Script -->
-  <main id="view-generator" class="workspace">
-    <!-- Barre latérale : Identité & Liste des effets -->
-    <aside id="explorer" class="explorer-container"></aside>
-
-    <!-- Zone centrale : Formulaire de paramétrage de l'effet actif -->
-    <section id="editor" class="editor-container"></section>
-
-    <!-- Zone droite : Prévisualisation temps réel du code Lua -->
-    <section class="code-preview-container">
-      <div class="code-header">
-        <span class="code-title">
-          <i class="fa-regular fa-file-code"></i> <span id="code-filename">c.lua</span>
-        </span>
+  <div class="app">
+    <!-- Barre supérieure de navigation -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="brand">
+          <i class="fa-solid fa-scroll"></i>
+        </div>
+        <div class="brand-text">
+          <strong>EDOPro Script Studio</strong>
+          <span>Générateur Lua YGO</span>
+        </div>
       </div>
-      <pre class="code-body"><code id="lua-output">-- Le code Lua apparaîtra ici...</code></pre>
-    </section>
-  </main>
-
-  <!-- VUE 2 : Documentation & Référence API -->
-  <main id="view-reference" class="workspace hidden">
-    <div class="reference-wrapper">
-      <h2><i class="fa-solid fa-book"></i> Aide & Aide-mémoire EDOPro Lua</h2>
-      <p>Voici les règles de base pour structurer vos scripts Yu-Gi-Oh! pour EDOPro :</p>
       
-      <div class="ref-card">
-        <h3><i class="fa-solid fa-cube"></i> Structure de base (cID.lua)</h3>
-        <p>Chaque carte enregistre ses effets dans la fonction <code>s.initial_effect(c)</code>.</p>
-        <pre><code>local s, id = GetID()
+      <nav class="topbar-tabs">
+        <button type="button" class="active" data-tab="generator">
+          <i class="fa-solid fa-code"></i> Générateur
+        </button>
+        <button type="button" data-tab="reference">
+          <i class="fa-solid fa-book-open"></i> Guide / Référence
+        </button>
+      </nav>
+
+      <div class="topbar-right">
+        <button type="button" id="btn-copy" class="btn btn-ghost btn-sm">
+          <i class="fa-solid fa-copy"></i> <span id="copy-label">Copier</span>
+        </button>
+        <button type="button" id="btn-export" class="btn btn-primary btn-sm">
+          <i class="fa-solid fa-download"></i> Télécharger .lua
+        </button>
+      </div>
+    </header>
+
+    <!-- VUE 1 : Générateur de Script -->
+    <main id="view-generator" class="workspace">
+      <!-- Barre latérale : Identité & Liste des effets -->
+      <aside id="explorer" class="explorer"></aside>
+
+      <!-- Zone centrale : Formulaire de paramétrage de l'effet actif -->
+      <section id="editor" class="editor"></section>
+
+      <!-- Zone droite : Prévisualisation temps réel du code Lua -->
+      <section class="codepanel">
+        <div class="codepanel-head">
+          <div class="dots">
+            <span class="dot-r"></span>
+            <span class="dot-y"></span>
+            <span class="dot-g"></span>
+            <span class="filename" id="code-filename">c.lua</span>
+          </div>
+        </div>
+        <div class="codepanel-body">
+          <pre><code id="lua-output">-- Le code Lua apparaîtra ici...</code></pre>
+        </div>
+        <div class="codepanel-foot">
+          <span><i class="fa-solid fa-check ok"></i> Prêt</span>
+          <span>Lua 5.3 / EDOPro API</span>
+        </div>
+      </section>
+    </main>
+
+    <!-- VUE 2 : Documentation & Référence API -->
+    <main id="view-reference" class="workspace hidden">
+      <div class="reference">
+        <div class="reference-wrapper">
+          <h2><i class="fa-solid fa-book"></i> Aide & Aide-mémoire EDOPro Lua</h2>
+          <p id="data-stats" style="color: var(--text-dim); margin-bottom: 20px;"></p>
+          
+          <div class="ref-grid">
+            <div class="ref-card">
+              <h3><i class="fa-solid fa-cube"></i> Structure de base (cID.lua)</h3>
+              <p>Chaque carte enregistre ses effets dans la fonction <code>s.initial_effect(c)</code>.</p>
+              <pre><code>local s, id = GetID()
 
 function s.initial_effect(c)
-  -- Exemple d'enregistrement d'un effet
+  -- Enregistrement d'un effet
   local e1 = Effect.CreateEffect(c)
   e1:SetType(EFFECT_TYPE_IGNITION)
   e1:SetRange(LOCATION_MZONE)
@@ -79,49 +96,40 @@ function s.initial_effect(c)
   e1:SetOperation(s.op1)
   c:RegisterEffect(e1)
 end</code></pre>
-      </div>
+            </div>
 
-      <div class="ref-card">
-        <h3><i class="fa-solid fa-layer-group"></i> Archétypes & Cartes liées</h3>
-        <p>Les propriétés de recherche ou de synergie se définissent via des listes d'IDs et de masques d'archétypes :</p>
-        <ul>
-          <li><code>s.listed_series = { 0x8, 0x3008 }</code> — Archétype(s) référencé(s) sur la carte.</li>
-          <li><code>s.listed_names = { 46986414 }</code> — IDs spécifiques de cartes citées texte pour texte.</li>
-        </ul>
+            <div class="ref-card">
+              <h3><i class="fa-solid fa-layer-group"></i> Archétypes & Cartes liées</h3>
+              <p>Les propriétés de recherche ou de synergie se définissent via des listes d'IDs et de masques d'archétypes :</p>
+              <ul>
+                <li><code>s.listed_series = { 0x8, 0x3008 }</code> — Archétype(s) référencé(s).</li>
+                <li><code>s.listed_names = { 46986414 }</code> — IDs spécifiques cités texte pour texte.</li>
+              </ul>
+            </div>
+
+            <div class="ref-card">
+              <h3><i class="fa-solid fa-coins"></i> Table des Compteurs (Counters)</h3>
+              <table class="ref-table">
+                <thead>
+                  <tr>
+                    <th>Nom</th>
+                    <th>Constante</th>
+                    <th>Hex</th>
+                  </tr>
+                </thead>
+                <tbody id="counters-table-body">
+                  <!-- Injecté dynamiquement depuis data.js via app.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </main>
+    </main>
+  </div>
 
   <!-- Chargement des Scripts -->
   <script src="data.js"></script>
   <script src="app.js"></script>
-  
-  <script>
-    // Initialisation du script au chargement de la page
-    document.addEventListener("DOMContentLoaded", () => {
-      // Finalisation de la fonction d'export initialement entamée dans le fichier app.js
-      if (typeof exportLuaFile === "undefined" || !exportLuaFile.toString().includes("a.click")) {
-        window.exportLuaFile = function() {
-          const filename = state.card.id ? `c${state.card.id}.lua` : "script.lua";
-          const blob = new Blob([window.generatedRawLua || ""], { type: "text/plain;charset=utf-8" });
-          const a = document.createElement("a");
-          a.href = URL.createObjectURL(blob);
-          a.download = filename;
-          a.click();
-          URL.revokeObjectURL(a.href);
-        };
-      }
-
-      // Rendu initial de l'application
-      window.renderAll = function() {
-        renderExplorer();
-        renderEditor();
-        renderCode();
-      };
-
-      // Premier rendu
-      renderAll();
-    });
-  </script>
 </body>
 </html>
