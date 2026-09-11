@@ -93,6 +93,40 @@ main{flex:1;width:100%;max-width:1720px;margin:0 auto;padding:22px 26px 60px}
 .view{display:none}
 .view.active{display:block}
 
+/* ---------- hero / intro band ---------- */
+.hero{
+  display:grid;grid-template-columns:1.3fr 1fr;gap:28px;align-items:center;
+  background:var(--ink-1);border:1px solid var(--line-soft);border-radius:16px;
+  padding:26px 28px;margin-bottom:22px;
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(520px 260px at 105% -20%, rgba(215,173,76,0.10), transparent 65%);
+}
+@media (max-width:900px){.hero{grid-template-columns:1fr}}
+.hero-text h2{font-size:19px;line-height:1.4;color:var(--text-bright);margin:0 0 10px;font-weight:700;letter-spacing:.1px}
+.hero-text p{font-size:13px;line-height:1.7;color:var(--text-dim);margin:0;max-width:62ch}
+.hero-text p a{color:var(--steel-bright);text-decoration:none;border-bottom:1px solid rgba(127,176,214,0.35)}
+.hero-text p a:hover{border-color:var(--steel-bright)}
+.hero-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;position:relative;z-index:1}
+.hero-steps li{display:flex;align-items:center;gap:12px}
+.hero-step-n{
+  width:28px;height:28px;flex-shrink:0;border-radius:50%;background:var(--ink-3);
+  border:1px solid var(--gold-dim);color:var(--gold);font-family:var(--mono);font-weight:700;font-size:12px;
+  display:flex;align-items:center;justify-content:center;
+}
+.hero-steps li div{display:flex;flex-direction:column;line-height:1.35}
+.hero-steps strong{font-size:12.5px;color:var(--text-bright);font-weight:700}
+.hero-steps span{font-size:11.5px;color:var(--text-dim);font-family:var(--mono)}
+
+footer.credit{
+  border-top:1px solid var(--line-soft);padding:16px 26px 26px;text-align:center;
+  font-size:11.5px;color:#57607a;font-family:var(--mono);
+}
+footer.credit a{color:var(--steel-bright);text-decoration:none;border-bottom:1px solid rgba(127,176,214,0.3)}
+footer.credit a:hover{border-color:var(--steel-bright)}
+
 .generator-grid{display:grid;grid-template-columns:minmax(0,1fr) 460px;gap:22px;align-items:start}
 @media (max-width:1180px){.generator-grid{grid-template-columns:1fr}}
 
@@ -260,6 +294,19 @@ datalist{}
 
   <!-- ============ GENERATOR VIEW ============ -->
   <div id="view-generator" class="view active">
+
+    <section class="hero">
+      <div class="hero-text">
+        <h2>Assemblez un script <code style="background:var(--ink-0);border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-family:var(--mono);color:var(--gold)">.lua</code> carte par carte, sans écrire de Lua à la main.</h2>
+        <p>Renseignez l'identité, le type et les effets de la carte : Kartouche assemble un script conforme aux conventions d'OCGCore utilisées par EDOPro et Project Ignis, en suivant les modèles documentés sur le <a href="https://ygoproscripting.miraheze.org/wiki/Main_Page" target="_blank" rel="noopener">wiki YGOPRO Scripting</a> (structure du script, types d'effet, fonctions Duel). Le code se met à jour à droite en temps réel.</p>
+      </div>
+      <ol class="hero-steps">
+        <li><span class="hero-step-n">1</span><div><strong>Définir</strong><span>passcode · type · statistiques</span></div></li>
+        <li><span class="hero-step-n">2</span><div><strong>Construire</strong><span>effets · coûts · conditions</span></div></li>
+        <li><span class="hero-step-n">3</span><div><strong>Exporter</strong><span>c&lt;passcode&gt;.lua prêt à déposer</span></div></li>
+      </ol>
+    </section>
+
     <div class="generator-grid">
 
       <div class="wizard">
@@ -417,6 +464,14 @@ datalist{}
   <div id="view-reference" class="view">
     <div class="ref-note">
       Rappel de signature commune à toutes les fonctions d'effet : <code>function s.xx(e,tp,eg,ep,ev,re,r,rp,chk)</code> — <code>e</code> l'effet, <code>tp</code> le joueur déclencheur, <code>eg</code> le groupe d'event, <code>ep</code> le joueur d'event, <code>ev</code> la valeur d'event, <code>re</code> l'effet responsable (Reason Effect), <code>chk</code> vaut <code>0</code> pendant la vérification de légalité et <code>nil</code>/absent pendant la résolution.
+      <div style="margin-top:10px;font-size:12px;color:var(--text-dim)">
+        Cette page résume des constantes utiles ; pour la documentation complète et à jour, voir le
+        <a href="https://ygoproscripting.miraheze.org/wiki/Main_Page" target="_blank" rel="noopener" style="color:var(--steel-bright)">wiki YGOPRO Scripting</a> —
+        notamment <a href="https://ygoproscripting.miraheze.org/wiki/Structure_of_a_card_script" target="_blank" rel="noopener" style="color:var(--steel-bright)">structure d'un script</a>,
+        <a href="https://ygoproscripting.miraheze.org/wiki/Activated_effects" target="_blank" rel="noopener" style="color:var(--steel-bright)">effets activables</a>,
+        <a href="https://ygoproscripting.miraheze.org/wiki/EFFECT_TYPE_constants_and_templates" target="_blank" rel="noopener" style="color:var(--steel-bright)">combinaisons d'EFFECT_TYPE</a> et la
+        <a href="https://ygoproscripting.miraheze.org/wiki/List_of_Duel_Functions" target="_blank" rel="noopener" style="color:var(--steel-bright)">liste des fonctions Duel</a>.
+      </div>
     </div>
     <div class="ref-search">
       <input type="text" id="ref-search-input" placeholder="Filtrer les constantes (ex: destroy, event_summon, race_dragon)…" oninput="filterRef(this.value)">
@@ -425,6 +480,10 @@ datalist{}
   </div>
 
 </main>
+
+<footer class="credit">
+  Références techniques : <a href="https://ygoproscripting.miraheze.org/wiki/Main_Page" target="_blank" rel="noopener">wiki YGOPRO Scripting</a> (Glitchy) — EDOPro / Project Ignis
+</footer>
 
 <script>
 /* ================= DATA ================= */
@@ -863,9 +922,9 @@ function generateScript(){
       else if(e.typeMain==='SINGLE'){ code += `\te${n}:SetType(EFFECT_TYPE_SINGLE)\n\te${n}:SetRange(LOCATION_MZONE)\n`; }
     } else {
       if(e.typeMain==='ACTIVATE'){ code += `\te${n}:SetType(EFFECT_TYPE_ACTIVATE)\n\te${n}:SetCode(EVENT_FREE_CHAIN)\n`; }
-      else if(e.typeMain==='CONTINUOUS'){ code += `\te${n}:SetType(EFFECT_TYPE_SINGLE)\n`; }
+      else if(e.typeMain==='CONTINUOUS'){ code += `\te${n}:SetType(EFFECT_TYPE_SINGLE)\n\te${n}:SetRange(LOCATION_SZONE)\n`; }
       else if(e.typeMain==='EQUIP'){ code += `\te${n}:SetType(EFFECT_TYPE_EQUIP)\n`; }
-      else if(e.typeMain==='QUICK_O'){ code += `\te${n}:SetType(EFFECT_TYPE_QUICK_O)\n\te${n}:SetCode(EVENT_FREE_CHAIN)\n`; }
+      else if(e.typeMain==='QUICK_O'){ code += `\te${n}:SetType(EFFECT_TYPE_QUICK_O)\n\te${n}:SetCode(EVENT_FREE_CHAIN)\n\te${n}:SetRange(LOCATION_SZONE)\n`; }
     }
 
     // OPT
