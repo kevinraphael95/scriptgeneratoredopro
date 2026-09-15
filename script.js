@@ -119,7 +119,8 @@ function addEffect(){
     op: (cardType==='MONSTER' ? 'SPECIAL_SUMMON_DECK' : 'DRAW'), opAmount: 1, opRaw: '',
     continuousRaw: '',
     eventCode: 'EVENT_SUMMON_SUCCESS', eventRaw: '',
-    cloneEvent: 'NONE'
+    cloneEvent: 'NONE',
+    extraFunctions: ''
   });
   renderEffects();
   render();
@@ -253,6 +254,12 @@ function renderEffects(){
         </div>
         ${e.op==='CUSTOM' ? `<div class="field"><label>Corps complet de s.tgN / s.opN (raw)</label><textarea placeholder="function s.tg${n}(e,tp,eg,ep,ev,re,r,rp,chk)&#10;&#9;if chk==0 then return true end&#10;end&#10;function s.op${n}(e,tp,eg,ep,ev,re,r,rp)&#10;&#9;-- ...&#10;end" oninput="updateEff(${e.id},'opRaw',this.value)">${e.opRaw}</textarea></div>` : ''}
         `}
+
+        <div class="field">
+          <label>Fonctions Lua additionnelles (optionnel — s.val${n}, s.cfilter${n}, etc.)</label>
+          <textarea placeholder="function s.cfilter${n}(c)&#10;&#9;return c:IsCode(CARD_DARK_MAGICIAN)&#10;end&#10;function s.val${n}(e,c)&#10;&#9;return Duel.GetMatchingGroupCount(s.cfilter${n},0,LOCATION_GRAVE,LOCATION_GRAVE,nil)*500&#10;end" oninput="updateEff(${e.id},'extraFunctions',this.value)">${e.extraFunctions||''}</textarea>
+          <span class="hint">Pour tout ce que les templates ne couvrent pas (valeurs qui se recalculent, filtres personnalisés…) — ajouté tel quel dans le script, à côté des autres fonctions de cet effet.</span>
+        </div>
 
       </div>
     </div>
@@ -440,6 +447,9 @@ function generateScript(){
     code += genCost(e, n);
     if(e.typeMain!=='CONTINUOUS' && e.typeMain!=='SINGLE' && e.typeMain!=='FIELD'){
       code += genTargetOperation(e, n);
+    }
+    if(e.extraFunctions && e.extraFunctions.trim()){
+      code += e.extraFunctions.trim() + '\n\n';
     }
   });
 
