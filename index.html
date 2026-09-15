@@ -24,10 +24,10 @@
   --emerald-soft:#e7f6f0;
   --rose:#c14e77;
   --rose-soft:#fbeaf1;
-  --code-bg:#1c1a24;
-  --code-panel:#232130;
-  --code-line:#34324a;
-  --code-text:#dcd9ec;
+  --code-bg:#ffffff;
+  --code-panel:#f4f0e8;
+  --code-line:var(--line);
+  --code-text:#211f2b;
   --sans:'Sora',system-ui,sans-serif;
   --mono:'JetBrains Mono',ui-monospace,monospace;
   --radius:20px;
@@ -197,7 +197,7 @@ main{flex:1;width:100%;max-width:1720px;margin:0 auto;padding:28px 26px 70px}
 /* code panel : reste sombre pour lisibilite, comme un bloc de code sur un site clair */
 .code-panel{
   position:sticky;top:82px;
-  background:var(--code-bg);border:1px solid #302e3d;border-radius:var(--radius);
+  background:var(--code-bg);border:1px solid var(--line);border-radius:var(--radius);
   overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 104px);
   box-shadow:var(--shadow);
 }
@@ -216,14 +216,14 @@ pre#lua-output{
   padding:10px 15px;border-top:1px solid var(--code-line);background:var(--code-panel);
   font-family:var(--mono);font-size:11px;color:var(--ink-faint);
 }
-.type-hint-bar b{color:#8b93f5}
+.type-hint-bar b{color:var(--accent)}
 
-.lua-kw{color:#f0789e;font-weight:600}
-.lua-fn{color:#6fc3e8}
-.lua-str{color:#8fdba0}
-.lua-num{color:#f0c26e}
-.lua-cm{color:#726f8c;font-style:italic}
-.lua-const{color:#c79cf0;font-weight:600}
+.lua-kw{color:#b8235f;font-weight:600}
+.lua-fn{color:#1c7fb0}
+.lua-str{color:#1f8f52}
+.lua-num{color:#a8710f}
+.lua-cm{color:#8a8598;font-style:italic}
+.lua-const{color:#7a3fc7;font-weight:600}
 
 /* reference view */
 .ref-search{display:flex;gap:10px;margin-bottom:20px}
