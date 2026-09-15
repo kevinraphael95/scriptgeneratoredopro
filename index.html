@@ -114,8 +114,8 @@
                 <div class="field">
                   <label>Catégorie principale</label>
                   <select id="m-main" onchange="render()">
-                    <option value="NORMAL">Normal</option>
-                    <option value="EFFECT" selected>À Effet</option>
+                    <option value="NORMAL" selected>Normal</option>
+                    <option value="EFFECT">À Effet</option>
                     <option value="RITUAL">Rituel</option>
                     <option value="FUSION">Fusion</option>
                     <option value="SYNCHRO">Synchro</option>
@@ -125,9 +125,9 @@
                 </div>
                 <div class="field"><label>Attribut</label><select id="m-attribute" onchange="render()"></select></div>
                 <div class="field"><label>Type (Race)</label><select id="m-race" onchange="render()"></select></div>
-                <div class="field"><label>ATK</label><input type="number" id="m-atk" value="0" oninput="render()"></div>
-                <div class="field" id="m-def-field"><label>DEF</label><input type="number" id="m-def" value="0" oninput="render()"></div>
-                <div class="field" id="m-level-field"><label>Niveau</label><input type="number" id="m-level" value="4" min="1" max="12" oninput="render()"></div>
+                <div class="field"><label>ATK</label><input type="number" id="m-atk" value="3000" oninput="render()"></div>
+                <div class="field" id="m-def-field"><label>DEF</label><input type="number" id="m-def" value="2500" oninput="render()"></div>
+                <div class="field" id="m-level-field"><label>Niveau</label><input type="number" id="m-level" value="8" min="1" max="12" oninput="render()"></div>
                 <div class="field" id="m-rank-field" style="display:none"><label>Rang</label><input type="number" id="m-rank" value="4" min="1" max="13" oninput="render()"></div>
                 <div class="field" id="m-link-field" style="display:none"><label>Cote de Lien</label><input type="number" id="m-linkrating" value="2" min="1" max="6" oninput="render()"></div>
                 <div class="field" id="m-scale-field" style="display:none"><label>Échelle Pendule</label><input type="number" id="m-scale" value="1" min="0" max="13" oninput="render()"></div>
