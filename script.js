@@ -117,7 +117,7 @@ window.onload = function(){
   buildMonsterFlagPills();
   buildLinkMarkerPills();
   buildArchetypeDatalist();
-  addEffect();
+  renderEffects();
   syncThemeIcon();
   render();
 };
