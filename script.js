@@ -1,4 +1,3 @@
-
 /* ================= STATE ================= */
 let cardType = "MONSTER";
 let setcodes = [];
@@ -111,7 +110,7 @@ function addEffect(){
   effSeq++;
   effects.push({
     id: effSeq,
-    label: 'Effet '+effSeq,
+    label: 'Effet '+(effects.length+1),
     typeMain: cardType==='MONSTER' ? 'IGNITION' : 'ACTIVATE',
     categories: [],
     optScope: 'CARD', optN: 1, optOath: false, optDuel: false,
@@ -153,7 +152,7 @@ function renderEffects(){
   container.innerHTML = effects.map((e, effIdx) => { const n = effIdx+1; return `
     <div class="eff-card">
       <div class="eff-head">
-        <span class="eff-badge">#${e.id}</span>
+        <span class="eff-badge">#${n}</span>
         <input class="eff-label" value="${e.label}" oninput="updateEff(${e.id},'label',this.value)">
         <button class="icon-btn" onclick="removeEffect(${e.id})" title="Supprimer">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"/></svg>
