@@ -36,6 +36,7 @@
   --lua-const:#7a3fc7;
   --bg-radial-1:rgba(63,75,209,0.07);
   --bg-radial-2:rgba(201,138,46,0.08);
+  --header-bg:rgba(250,247,242,0.86);
 }
 [data-theme="dark"]{
   --bg:#0d0f16;
@@ -69,6 +70,7 @@
   --lua-const:#c79cf0;
   --bg-radial-1:rgba(123,131,234,0.10);
   --bg-radial-2:rgba(224,181,102,0.07);
+  --header-bg:rgba(13,15,22,0.86);
 }
 
 *{box-sizing:border-box}
@@ -97,7 +99,7 @@ input:focus,select:focus,textarea:focus{outline:none}
 /* ---------- header : pill nav a la "learning_test" ---------- */
 header.top{
   border-bottom:1px solid var(--line);
-  background:rgba(250,247,242,0.86);
+  background:var(--header-bg);
   backdrop-filter:blur(10px);
   position:sticky;top:0;z-index:50;
   padding:14px 26px;
@@ -125,7 +127,7 @@ nav.tabs button{
   border:none;background:transparent;color:var(--ink-soft);
   font-size:12.5px;font-weight:700;padding:8px 18px;border-radius:999px;transition:.15s;
 }
-nav.tabs button.active{background:var(--ink);color:#fff}
+nav.tabs button.active{background:var(--accent);color:#fff}
 nav.tabs button:hover:not(.active){color:var(--ink)}
 
 .actions{display:flex;gap:8px}
@@ -134,7 +136,7 @@ nav.tabs button:hover:not(.active){color:var(--ink)}
   color:var(--ink);font-size:12.5px;font-weight:700;padding:9px 16px;
   display:flex;align-items:center;gap:7px;transition:.15s;
 }
-.btn:hover{background:var(--ink);color:#fff}
+.btn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
 .btn svg{width:13px;height:13px}
@@ -186,6 +188,7 @@ main{flex:1;width:100%;max-width:1720px;margin:0 auto;padding:28px 26px 70px}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);background:var(--paper)}
 .field textarea{font-family:var(--mono);font-size:12px;resize:vertical;min-height:70px;line-height:1.5}
 .field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235b5872'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:28px}
+[data-theme="dark"] .field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23a7a3c0'/%3E%3C/svg%3E")}
 
 .pill-row{display:flex;flex-wrap:wrap;gap:7px}
 .pill{
