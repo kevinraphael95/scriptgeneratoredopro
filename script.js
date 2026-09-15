@@ -112,8 +112,8 @@ let effSeq = 0;
 
 /* ================= INIT ================= */
 window.onload = function(){
-  populateSelect('m-attribute', ATTRIBUTES.map(a=>[a, ATTR_LABELS_FR[a]]));
-  populateSelect('m-race', RACES.map(r=>[r, RACE_LABELS_FR[r]]));
+  populateSelect('m-attribute', ATTRIBUTES.map(a=>[a, ATTR_LABELS_FR[a]]), 'LIGHT');
+  populateSelect('m-race', RACES.map(r=>[r, RACE_LABELS_FR[r]]), 'DRAGON');
   buildMonsterFlagPills();
   buildLinkMarkerPills();
   buildArchetypeDatalist();
@@ -136,9 +136,9 @@ function syncThemeIcon(){
   document.getElementById('theme-icon-light').style.display = t === 'dark' ? 'block' : 'none';
 }
 
-function populateSelect(id, pairs){
+function populateSelect(id, pairs, selected){
   const el = document.getElementById(id);
-  el.innerHTML = pairs.map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
+  el.innerHTML = pairs.map(([v,l])=>`<option value="${v}" ${v===selected?'selected':''}>${l}</option>`).join('');
 }
 
 function buildArchetypeDatalist(){
